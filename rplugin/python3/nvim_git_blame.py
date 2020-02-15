@@ -81,7 +81,6 @@ class NvimGitBlame:
         state = 0
         for line in blame_lines:
             if state == 0:
-                print(line, end='')
                 (sha1, _, line_start, line_num) = line.split(' ')
                 line_start = int(line_start)
                 line_num = int(line_num)
@@ -109,7 +108,6 @@ class NvimGitBlame:
                 elif key == 'summary':
                     summary = li[1]
                 elif key == 'filename':
-                    print('{} {} {}\n'.format(sha1, line_start, line_num))
                     info = _BlameInfo(sha1, author, author_time, author_tz, summary)
                     sha1_cache[sha1] = info
                     for nu in range(line_start - 1, line_start - 1 +line_num):
