@@ -47,6 +47,14 @@ class NvimGitBlame:
     def on_cursor_moved(self, data):
         self._repaint(int(data['abuf']), data['nu'] - 1)
 
+    @pynvim.autocmd('InsertLeave', eval='{"abuf": expand("<abuf>"), "nu": line(".")}')
+    def on_insert_leave(self, data):
+        self._repaint(int(data['abuf']), data['nu'] - 1)
+
+    @pynvim.autocmd('InsertEnter')
+    def on_insert_enter(self):
+        self._nvim.call('nvim_buf_clear_namespace', 0, self._namespace, 0, -1)
+
     def _repaint(self, buffer_num, nu):
         self._nvim.call('nvim_buf_clear_namespace', 0, self._namespace, 0, -1)
         #self._nvim.call('nvim_buf_set_virtual_text', 0, self._namespace, nu, [[' buffer_num: {}, nu: {}, buffer_blame_info: {}'.format(buffer_num, nu, self._buffer_blame_info), 'Comment']], {})
