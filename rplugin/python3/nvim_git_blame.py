@@ -11,7 +11,11 @@ class NvimGitBlame:
     def __init__(self, nvim):
         self._nvim = nvim
         self._buffer_blame_info = {}
-        self._namespace = nvim.call('nvim_create_namespace', 'nvim-git-blame-messages')
+        self._namespace = None
+
+    @pynvim.autocmd('VimEnter', sync=True)
+    def on_vim_enter(self):
+        self._namespace = self._nvim.call('nvim_create_namespace', 'nvim-git-blame-messages')
 
     @pynvim.autocmd('BufReadPre', eval='{"afile": expand("<afile>"), "abuf": expand("<abuf>")}')
     def on_buf_read_pre(self, data):
