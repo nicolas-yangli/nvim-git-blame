@@ -17,13 +17,17 @@ class NvimGitBlame:
     def on_vim_enter(self):
         self._namespace = self._nvim.call('nvim_create_namespace', 'nvim-git-blame-messages')
 
-    @pynvim.autocmd('BufReadPre', eval='{"afile": expand("<afile>"), "abuf": expand("<abuf>")}')
-    def on_buf_read_pre(self, data):
-        self._load_blame_info(data['afile'], int(data['abuf']))
+    @pynvim.autocmd('BufReadPre', eval='expand("<abuf>")')
+    def on_buf_read_pre(self, abuf):
+        abuf = int(abuf)
+        afile = self._nvim.call('bufname', abuf)
+        self._load_blame_info(afile, abuf)
 
-    @pynvim.autocmd('BufWritePost', eval='{"afile": expand("<afile>"), "abuf": expand("<abuf>")}')
-    def on_buf_write_post(self, data):
-        self._load_blame_info(data['afile'], int(data['abuf']))
+    @pynvim.autocmd('BufWritePost', eval='expand("<abuf>")')
+    def on_buf_write_post(self, abuf):
+        abuf = int(abuf)
+        afile = self._nvim.call('bufname', abuf)
+        self._load_blame_info(afile, abuf)
 
     def _load_blame_info(self, filename, buffer_num):
         filepath = Path(filename).resolve()
