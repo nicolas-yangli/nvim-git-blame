@@ -14,9 +14,10 @@ class NvimGitBlame:
         self._buffer_blame_info = {}
         self._namespace = None
 
-    @pynvim.autocmd('VimEnter', sync=True)
-    def on_vim_enter(self):
-        self._namespace = self._nvim.call('nvim_create_namespace', 'nvim-git-blame-messages')
+    def namespace(self):
+        if self._namespace is None:
+            self._namespace = self._nvim.call('nvim_create_namespace', 'nvim-git-blame-messages')
+        return self._namespace
 
     @pynvim.autocmd('BufReadPre', eval='{"abuf": expand("<abuf>"), "afile": expand("<afile>:p")}')
     def on_buf_read_pre(self, data):
@@ -58,14 +59,14 @@ class NvimGitBlame:
 
     @pynvim.autocmd('InsertEnter')
     def on_insert_enter(self):
-        self._nvim.call('nvim_buf_clear_namespace', 0, self._namespace, 0, -1)
+        self._nvim.call('nvim_buf_clear_namespace', 0, self.namespace(), 0, -1)
 
     def _repaint(self, buffer_num, nu):
-        self._nvim.call('nvim_buf_clear_namespace', 0, self._namespace, 0, -1)
-        #self._nvim.call('nvim_buf_set_virtual_text', 0, self._namespace, nu, [[' buffer_num: {}, nu: {}, buffer_blame_info: {}'.format(buffer_num, nu, self._buffer_blame_info), 'Comment']], {})
+        self._nvim.call('nvim_buf_clear_namespace', 0, self.namespace(), 0, -1)
+        #self._nvim.call('nvim_buf_set_virtual_text', 0, self.namespace(), nu, [[' buffer_num: {}, nu: {}, buffer_blame_info: {}'.format(buffer_num, nu, self._buffer_blame_info), 'Comment']], {})
         blame_text = self._format_blame(buffer_num, nu)
         if blame_text:
-            self._nvim.call('nvim_buf_set_virtual_text', 0, self._namespace, nu, [[blame_text, 'Comment']], {})
+            self._nvim.call('nvim_buf_set_virtual_text', 0, self.namespace(), nu, [[blame_text, 'Comment']], {})
 
     def _format_blame(self, buffer_num, nu):
         buffer_blame_info = self._buffer_blame_info.get(buffer_num)
